@@ -101,29 +101,29 @@ namespace ITMLib
 			}
 		}
 
-		bool requiresColourRendering() const
+		bool RequiresColorRendering() const
 		{
 			for (size_t i = 0, size = trackers.size(); i < size; ++i)
 			{
-				if (trackers[i]->requiresColourRendering()) return true;
+				if (trackers[i]->RequiresColorRendering()) return true;
 			}
 			return false;
 		}
 
-		bool requiresDepthReliability() const
+		bool RequiresDepthReliability() const
 		{
 			for (size_t i = 0, size = trackers.size(); i < size; ++i)
 			{
-				if (trackers[i]->requiresDepthReliability()) return true;
+				if (trackers[i]->RequiresDepthReliability()) return true;
 			}
 			return false;
 		}
 
-		bool requiresPointCloudRendering() const
+		bool RequiresPointCloudRendering() const
 		{
 			for (size_t i = 0, size = trackers.size(); i < size; ++i)
 			{
-				if (trackers[i]->requiresPointCloudRendering()) return true;
+				if (trackers[i]->RequiresPointCloudRendering()) return true;
 			}
 			return false;
 		}

@@ -52,19 +52,19 @@ ExtendedTracker_CPU::~ExtendedTracker_CPU() { }
  */
 int ExtendedTracker_CPU::ComputeGandH_Depth(float &f, float *nabla, float *hessian, Matrix4f approxInvPose)
 {
-	Vector4f *pointsMap = sceneHierarchyLevel_Depth->pointsMap->GetData(MEMORYDEVICE_CPU);
-	Vector4f *normalsMap = sceneHierarchyLevel_Depth->normalsMap->GetData(MEMORYDEVICE_CPU);
-	Vector4f sceneIntrinsics = sceneHierarchyLevel_Depth->intrinsics;
-	Vector2i sceneImageSize = sceneHierarchyLevel_Depth->pointsMap->dimensions;
+	Vector4f *pointsMap = point_cloud_hierarchy_level_depth->pointsMap->GetData(MEMORYDEVICE_CPU);
+	Vector4f *normalsMap = point_cloud_hierarchy_level_depth->normalsMap->GetData(MEMORYDEVICE_CPU);
+	Vector4f sceneIntrinsics = point_cloud_hierarchy_level_depth->intrinsics;
+	Vector2i sceneImageSize = point_cloud_hierarchy_level_depth->pointsMap->dimensions;
 
-	const float *depth = viewHierarchyLevel_Depth->depth->GetData(MEMORYDEVICE_CPU);
-	Vector4f viewIntrinsics = viewHierarchyLevel_Depth->intrinsics;
-	Vector2i viewImageSize = viewHierarchyLevel_Depth->depth->dimensions;
+	const float *depth = view_hierarchy_level_depth->depth->GetData(MEMORYDEVICE_CPU);
+	Vector4f viewIntrinsics = view_hierarchy_level_depth->intrinsics;
+	Vector2i viewImageSize = view_hierarchy_level_depth->depth->dimensions;
 
-	if (currentIterationType == TRACKER_ITERATION_NONE) return 0;
+	if (current_iteration_type == TRACKER_ITERATION_NONE) return 0;
 
-	bool shortIteration = (currentIterationType == TRACKER_ITERATION_ROTATION)
-						   || (currentIterationType == TRACKER_ITERATION_TRANSLATION);
+	bool shortIteration = (current_iteration_type == TRACKER_ITERATION_ROTATION)
+						   || (current_iteration_type == TRACKER_ITERATION_TRANSLATION);
 
 	float sumHessian[6 * 6], sumNabla[6], sumF; int noValidPoints;
 	int noPara = shortIteration ? 3 : 6, noParaSQ = shortIteration ? 3 + 2 + 1 : 6 + 5 + 4 + 3 + 2 + 1;
@@ -84,24 +84,24 @@ int ExtendedTracker_CPU::ComputeGandH_Depth(float &f, float *nabla, float *hessi
 
 		float depthWeight;
 
-		if (framesProcessed < 100)
+		if (frames_processed < 100)
 		{
-			switch (currentIterationType)
+			switch (current_iteration_type)
 			{
 			case TRACKER_ITERATION_ROTATION:
 				isValidPoint = computePerPointGH_exDepth<true, true, false>(localNabla, localHessian, localF, x, y, depth[x + y * viewImageSize.x], depthWeight,
-					viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scenePose, pointsMap, normalsMap, spaceThresh[currentLevelId],
-					viewFrustum_min, viewFrustum_max, tukeyCutOff, framesToSkip, framesToWeight);
+				                                                            viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scene_pose, pointsMap, normalsMap, level_distance_thresholds[current_level_id],
+				                                                            near_clipping_distance, far_clipping_distance, tukey_cutoff, frames_to_skip, frames_to_weight);
 				break;
 			case TRACKER_ITERATION_TRANSLATION:
 				isValidPoint = computePerPointGH_exDepth<true, false, false>(localNabla, localHessian, localF, x, y, depth[x + y * viewImageSize.x], depthWeight,
-					viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scenePose, pointsMap, normalsMap, spaceThresh[currentLevelId],
-					viewFrustum_min, viewFrustum_max, tukeyCutOff, framesToSkip, framesToWeight);
+				                                                             viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scene_pose, pointsMap, normalsMap, level_distance_thresholds[current_level_id],
+				                                                             near_clipping_distance, far_clipping_distance, tukey_cutoff, frames_to_skip, frames_to_weight);
 				break;
 			case TRACKER_ITERATION_BOTH:
 				isValidPoint = computePerPointGH_exDepth<false, false, false>(localNabla, localHessian, localF, x, y, depth[x + y * viewImageSize.x], depthWeight,
-					viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scenePose, pointsMap, normalsMap, spaceThresh[currentLevelId],
-					viewFrustum_min, viewFrustum_max, tukeyCutOff, framesToSkip, framesToWeight);
+				                                                              viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scene_pose, pointsMap, normalsMap, level_distance_thresholds[current_level_id],
+				                                                              near_clipping_distance, far_clipping_distance, tukey_cutoff, frames_to_skip, frames_to_weight);
 				break;
 			default:
 				isValidPoint = false;
@@ -110,22 +110,22 @@ int ExtendedTracker_CPU::ComputeGandH_Depth(float &f, float *nabla, float *hessi
 		}
 		else
 		{
-			switch (currentIterationType)
+			switch (current_iteration_type)
 			{
 			case TRACKER_ITERATION_ROTATION:
 				isValidPoint = computePerPointGH_exDepth<true, true, true>(localNabla, localHessian, localF, x, y, depth[x + y * viewImageSize.x], depthWeight,
-					viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scenePose, pointsMap, normalsMap, spaceThresh[currentLevelId],
-					viewFrustum_min, viewFrustum_max, tukeyCutOff, framesToSkip, framesToWeight);
+				                                                           viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scene_pose, pointsMap, normalsMap, level_distance_thresholds[current_level_id],
+				                                                           near_clipping_distance, far_clipping_distance, tukey_cutoff, frames_to_skip, frames_to_weight);
 				break;
 			case TRACKER_ITERATION_TRANSLATION:
 				isValidPoint = computePerPointGH_exDepth<true, false, true>(localNabla, localHessian, localF, x, y, depth[x + y * viewImageSize.x], depthWeight,
-					viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scenePose, pointsMap, normalsMap, spaceThresh[currentLevelId],
-					viewFrustum_min, viewFrustum_max, tukeyCutOff, framesToSkip, framesToWeight);
+				                                                            viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scene_pose, pointsMap, normalsMap, level_distance_thresholds[current_level_id],
+				                                                            near_clipping_distance, far_clipping_distance, tukey_cutoff, frames_to_skip, frames_to_weight);
 				break;
 			case TRACKER_ITERATION_BOTH:
 				isValidPoint = computePerPointGH_exDepth<false, false, true>(localNabla, localHessian, localF, x, y, depth[x + y * viewImageSize.x], depthWeight,
-					viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scenePose, pointsMap, normalsMap, spaceThresh[currentLevelId],
-					viewFrustum_min, viewFrustum_max, tukeyCutOff, framesToSkip, framesToWeight);
+				                                                             viewImageSize, viewIntrinsics, sceneImageSize, sceneIntrinsics, approxInvPose, scene_pose, pointsMap, normalsMap, level_distance_thresholds[current_level_id],
+				                                                             near_clipping_distance, far_clipping_distance, tukey_cutoff, frames_to_skip, frames_to_weight);
 				break;
 			default:
 				isValidPoint = false;
@@ -161,21 +161,21 @@ int ExtendedTracker_CPU::ComputeGandH_Depth(float &f, float *nabla, float *hessi
 
 int ExtendedTracker_CPU::ComputeGandH_RGB(float &f, float *nabla, float *hessian, Matrix4f approxInvPose)
 {
-	const Vector2i viewImageSize_depth = viewHierarchyLevel_Depth->depth->dimensions;
-	const Vector2i viewImageSize_rgb = viewHierarchyLevel_Intensity->intensity_prev->dimensions;
+	const Vector2i viewImageSize_depth = view_hierarchy_level_depth->depth->dimensions;
+	const Vector2i viewImageSize_rgb = view_hierarchy_level_intensity->intensity_prev->dimensions;
 
-	const Vector4f *points_curr = reprojectedPointsLevel->data->GetData(MEMORYDEVICE_CPU);
-	const float *intensities_prev = viewHierarchyLevel_Intensity->intensity_prev->GetData(MEMORYDEVICE_CPU);
-	const float *intensities_current = projectedIntensityLevel->data->GetData(MEMORYDEVICE_CPU);
-	const Vector2f *gradients = viewHierarchyLevel_Intensity->gradients->GetData(MEMORYDEVICE_CPU);
+	const Vector4f *points_curr = reprojected_points_level->data->GetData(MEMORYDEVICE_CPU);
+	const float *intensities_prev = view_hierarchy_level_intensity->intensity_prev->GetData(MEMORYDEVICE_CPU);
+	const float *intensities_current = projected_intensity_level->data->GetData(MEMORYDEVICE_CPU);
+	const Vector2f *gradients = view_hierarchy_level_intensity->gradients->GetData(MEMORYDEVICE_CPU);
 
-	Vector4f projParams_rgb = viewHierarchyLevel_Intensity->intrinsics;
-	Vector4f projParams_depth = viewHierarchyLevel_Depth->intrinsics;
+	Vector4f projParams_rgb = view_hierarchy_level_intensity->intrinsics;
+	Vector4f projParams_depth = view_hierarchy_level_depth->intrinsics;
 
-	if (currentIterationType == TRACKER_ITERATION_NONE) return 0;
+	if (current_iteration_type == TRACKER_ITERATION_NONE) return 0;
 
-	bool shortIteration = (currentIterationType == TRACKER_ITERATION_ROTATION)
-						   || (currentIterationType == TRACKER_ITERATION_TRANSLATION);
+	bool shortIteration = (current_iteration_type == TRACKER_ITERATION_ROTATION)
+						   || (current_iteration_type == TRACKER_ITERATION_TRANSLATION);
 
 	float sumHessian[6 * 6], sumNabla[6], sumF;
 	int noValidPoints;
@@ -194,7 +194,7 @@ int ExtendedTracker_CPU::ComputeGandH_RGB(float &f, float *nabla, float *hessian
 
 		bool isValidPoint = false;
 
-		switch (currentIterationType)
+		switch (current_iteration_type)
 		{
 		case TRACKER_ITERATION_ROTATION:
 			isValidPoint = computePerPointGH_exRGB_inv_Ab<true, true>(
@@ -212,12 +212,12 @@ int ExtendedTracker_CPU::ComputeGandH_RGB(float &f, float *nabla, float *hessian
 					projParams_depth,
 					projParams_rgb,
 					approxInvPose,
-					depthToRGBTransform * scenePose,
-					colourThresh[currentLevelId],
-					minColourGradient,
-					viewFrustum_min,
-					viewFrustum_max,
-					tukeyCutOff
+					depth_to_color_camera_transform * scene_pose,
+					level_color_thresholds[current_level_id],
+					min_color_gradient,
+					near_clipping_distance,
+					far_clipping_distance,
+					tukey_cutoff
 					);
 			break;
 		case TRACKER_ITERATION_TRANSLATION:
@@ -236,12 +236,12 @@ int ExtendedTracker_CPU::ComputeGandH_RGB(float &f, float *nabla, float *hessian
 					projParams_depth,
 					projParams_rgb,
 					approxInvPose,
-					depthToRGBTransform * scenePose,
-					colourThresh[currentLevelId],
-					minColourGradient,
-					viewFrustum_min,
-					viewFrustum_max,
-					tukeyCutOff
+					depth_to_color_camera_transform * scene_pose,
+					level_color_thresholds[current_level_id],
+					min_color_gradient,
+					near_clipping_distance,
+					far_clipping_distance,
+					tukey_cutoff
 					);
 			break;
 		case TRACKER_ITERATION_BOTH:
@@ -260,12 +260,12 @@ int ExtendedTracker_CPU::ComputeGandH_RGB(float &f, float *nabla, float *hessian
 					projParams_depth,
 					projParams_rgb,
 					approxInvPose,
-					depthToRGBTransform * scenePose,
-					colourThresh[currentLevelId],
-					minColourGradient,
-					viewFrustum_min,
-					viewFrustum_max,
-					tukeyCutOff
+					depth_to_color_camera_transform * scene_pose,
+					level_color_thresholds[current_level_id],
+					min_color_gradient,
+					near_clipping_distance,
+					far_clipping_distance,
+					tukey_cutoff
 					);
 			break;
 		default:

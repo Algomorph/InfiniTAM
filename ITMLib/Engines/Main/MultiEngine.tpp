@@ -118,7 +118,7 @@ CameraTrackingState* MultiEngine<TVoxel, TIndex>::GetTrackingState()
 {
 	int idx = mActiveDataManager->findPrimaryLocalMapIdx();
 	if (idx < 0) idx = 0;
-	return mapManager->getLocalMap(idx)->trackingState;
+	return mapManager->getLocalMap(idx)->tracking_state;
 }
 
 // -whenever a new local scene is added, add to list of "to be established 3D relations"
@@ -201,7 +201,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 			if (primaryDataIdx >= 0) primaryLocalMapIdx = mActiveDataManager->getLocalMapIndex(primaryDataIdx);
 
 			//check if relocaliser has fired
-			ORUtils::SE3Pose *pose = primaryLocalMapIdx >= 0 ? mapManager->getLocalMap(primaryLocalMapIdx)->trackingState->pose_d : nullptr;
+			ORUtils::SE3Pose *pose = primaryLocalMapIdx >= 0 ? mapManager->getLocalMap(primaryLocalMapIdx)->tracking_state->pose_d : nullptr;
 			bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, pose, primaryLocalMapIdx, k_loopcloseneighbours, NN, distances, primaryTrackingSuccess);
 
 			//frame not added and tracking failed -> we need to relocalise

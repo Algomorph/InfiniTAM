@@ -18,12 +18,12 @@ namespace ITMLib
 		virtual void TrackCamera(CameraTrackingState *trackingState, const View *view);
 
 		/** Override */
-		virtual bool requiresColourRendering() const;
+		virtual bool RequiresColorRendering() const;
 
 		/** Override */
-		virtual bool requiresDepthReliability() const;
+		virtual bool RequiresDepthReliability() const;
 
 		/** Override */
-		virtual bool requiresPointCloudRendering() const;
+		virtual bool RequiresPointCloudRendering() const;
 	};
 }

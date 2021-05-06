@@ -69,7 +69,7 @@ namespace ITMLib
 		const ORUtils::SE3Pose & getEstimatedGlobalPose(int localMapId) const { return allData[localMapId]->estimatedGlobalPose; }
 
 		bool resetTracking(int localMapId, const ORUtils::SE3Pose & pose);
-		const ORUtils::SE3Pose* getTrackingPose(int localMapId) const { return getLocalMap(localMapId)->trackingState->pose_d; }
+		const ORUtils::SE3Pose* getTrackingPose(int localMapId) const { return getLocalMap(localMapId)->tracking_state->pose_d; }
 
 		int getLocalMapSize(int localMapId) const;
 		int countVisibleBlocks(int localMapId, int minBlockId, int maxBlockId, bool invertIDs) const;

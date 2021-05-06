@@ -75,9 +75,9 @@ namespace ITMLib
 
 		void TrackCamera(CameraTrackingState *trackingState, const View *view);
 
-		bool requiresColourRendering() const { return true; }
-		bool requiresDepthReliability() const { return false; }
-		bool requiresPointCloudRendering() const { return true; }
+		bool RequiresColorRendering() const { return true; }
+		bool RequiresDepthReliability() const { return false; }
+		bool RequiresPointCloudRendering() const { return true; }
 
 		ColorTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
 		             const ImageProcessingEngineInterface *lowLevelEngine, MemoryDeviceType memoryType);

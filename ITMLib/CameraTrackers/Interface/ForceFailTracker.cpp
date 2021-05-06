@@ -12,17 +12,17 @@ void ForceFailTracker::TrackCamera(CameraTrackingState *trackingState, const Vie
 	trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 }
 
-bool ForceFailTracker::requiresColourRendering() const
+bool ForceFailTracker::RequiresColorRendering() const
 {
 	return false;
 }
 
-bool ForceFailTracker::requiresDepthReliability() const
+bool ForceFailTracker::RequiresDepthReliability() const
 {
 	return false;
 }
 
-bool ForceFailTracker::requiresPointCloudRendering() const
+bool ForceFailTracker::RequiresPointCloudRendering() const
 {
 	return false;
 }

@@ -106,7 +106,9 @@ if (BUILD_TESTS)
         TestDataGeneration/GenerateRigidAlignmentTestData.tpp
         TestDataGeneration/GenerateRigidAlignmentTestData.h
         TestDataGeneration/ConstructTeddyVolumes.cpp
-        TestDataGeneration/ConstructTeddyVolumes.h TestDataGeneration/GenerateImageProcessingTestData.cpp TestDataGeneration/GenerateImageProcessingTestData.h)
+        TestDataGeneration/ConstructTeddyVolumes.h
+        TestDataGeneration/GenerateImageProcessingTestData.cpp
+        TestDataGeneration/GenerateImageProcessingTestData.h)
     add_executable(generate_derived_test_data ${sources})
     target_link_libraries(generate_derived_test_data PRIVATE InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
 

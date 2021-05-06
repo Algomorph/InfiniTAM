@@ -23,24 +23,24 @@ namespace ITMLib
 	class ExtendedTracker : public CameraTracker
 	{
 	private:
-		static const int MIN_VALID_POINTS_DEPTH;
-		static const int MIN_VALID_POINTS_RGB;
+		static const int min_valid_points_depth;
+		static const int min_valid_points_color;
 
-		const ImageProcessingEngineInterface *lowLevelEngine;
-		ImageHierarchy<OrderedPointCloudHierarchyLevel> *sceneHierarchy;
-		ImageHierarchy<DepthHierarchyLevel> *viewHierarchy_Depth;
-		ImageHierarchy<IntensityHierarchyLevel> *viewHierarchy_Intensity;
-		ImageHierarchy<TemplatedHierarchyLevel<Float4Image> > *reprojectedPointsHierarchy;
-		ImageHierarchy<TemplatedHierarchyLevel<FloatImage> > *projectedIntensityHierarchy;
+		const ImageProcessingEngineInterface *low_level_engine;
+		ImageHierarchy<OrderedPointCloudHierarchyLevel> *scene_hierarchy;
+		ImageHierarchy<DepthHierarchyLevel> *view_hierarchy_depth;
+		ImageHierarchy<IntensityHierarchyLevel> *view_hierarchy_intensity;
+		ImageHierarchy<TemplatedHierarchyLevel<Float4Image> > *reprojected_points_hierarchy;
+		ImageHierarchy<TemplatedHierarchyLevel<FloatImage> > *projected_intensity_hierarchy;
 
-		CameraTrackingState *trackingState;
+		CameraTrackingState *tracking_state;
 		const View *view;
 
-		int *noIterationsPerLevel;
+		int *iteration_per_level_count;
 
-		float terminationThreshold;
+		float termination_threshold;
 
-		float colourWeight;
+		float color_weight;
 
 		void PrepareForEvaluation();
 		void SetEvaluationParams(int levelId);
@@ -57,28 +57,28 @@ namespace ITMLib
 		ORUtils::SVMClassifier *svmClassifier;
 		Vector4f mu, sigma;
 	protected:
-		float *spaceThresh;
-		float *colourThresh;
+		float *level_distance_thresholds;
+		float *level_color_thresholds;
 
-		int currentLevelId;
-		TrackerIterationType currentIterationType;
+		int current_level_id;
+		TrackerIterationType current_iteration_type;
 
-		Matrix4f scenePose;
-		Matrix4f depthToRGBTransform;
-		OrderedPointCloudHierarchyLevel *sceneHierarchyLevel_Depth;
-		DepthHierarchyLevel *viewHierarchyLevel_Depth;
-		IntensityHierarchyLevel *viewHierarchyLevel_Intensity;
-		TemplatedHierarchyLevel<Float4Image> *reprojectedPointsLevel;
-		TemplatedHierarchyLevel<FloatImage > *projectedIntensityLevel;
+		Matrix4f scene_pose;
+		Matrix4f depth_to_color_camera_transform;
+		OrderedPointCloudHierarchyLevel *point_cloud_hierarchy_level_depth;
+		DepthHierarchyLevel *view_hierarchy_level_depth;
+		IntensityHierarchyLevel *view_hierarchy_level_intensity;
+		TemplatedHierarchyLevel<Float4Image> *reprojected_points_level;
+		TemplatedHierarchyLevel<FloatImage > *projected_intensity_level;
 
-		bool useColour;
-		bool useDepth;
+		bool use_color;
+		bool use_depth;
 
-		float minColourGradient;
-		float viewFrustum_min, viewFrustum_max;
-		float tukeyCutOff;
-		int framesToSkip, framesToWeight;
-		int framesProcessed;
+		float min_color_gradient;
+		float near_clipping_distance, far_clipping_distance;
+		float tukey_cutoff;
+		int frames_to_skip, frames_to_weight;
+		int frames_processed;
 
 		virtual int ComputeGandH_Depth(float &f, float *nabla, float *hessian, Matrix4f approxInvPose) = 0;
 		virtual int ComputeGandH_RGB(float &f, float *nabla, float *hessian, Matrix4f approxPose) = 0;
@@ -88,35 +88,34 @@ namespace ITMLib
 		                                          const FloatImage *depth_in,
 		                                          const Vector4f &intrinsics_depth,
 		                                          const Vector4f &intrinsics_rgb,
-		                                          const Matrix4f &scenePose) = 0;
+		                                          const Matrix4f &volume_pose) = 0;
 
 	public:
-		void TrackCamera(CameraTrackingState *trackingState, const View *view);
+		void TrackCamera(CameraTrackingState *tracking_state, const View *view);
 
-		bool requiresColourRendering() const { return false; }
-		bool requiresDepthReliability() const { return true; }
-		bool requiresPointCloudRendering() const { return true; }
+		bool RequiresColorRendering() const { return false; }
+		bool RequiresDepthReliability() const { return true; }
+		bool RequiresPointCloudRendering() const { return true; }
 
-		void SetupLevels(int numIterCoarse, int numIterFine, float spaceThreshCoarse, float spaceThreshFine, float colourThreshCoarse, float colourThreshFine);
+		void SetupLevels(int iteration_count_coarse, int iteration_count_fine, float distance_threshold_coarse, float distance_threshold_fine, float color_threshold_coarse, float color_threshold_fine);
 
-		ExtendedTracker(Vector2i imgSize_d,
-		                Vector2i imgSize_rgb,
-		                bool useDepth,
-		                bool useColour,
-		                float colourWeight,
-		                TrackerIterationType *trackingRegime,
-		                int noHierarchyLevels,
-		                float terminationThreshold,
-		                float failureDetectorThreshold,
-		                float viewFrustum_min,
-		                float viewFrustum_max,
-		                float minColourGradient,
-		                float tukeyCutOff,
-		                int framesToSkip,
-		                int framesToWeight,
-		                const ImageProcessingEngineInterface *lowLevelEngine,
-		                MemoryDeviceType memoryType
-						   );
+		ExtendedTracker(Vector2i depth_image_size,
+		                Vector2i color_image_size,
+		                bool use_depth,
+		                bool use_color,
+		                float color_weight,
+		                TrackerIterationType *level_optimization_types,
+		                int hierarchy_level_count,
+		                float termination_threshold,
+		                float failure_detection_threshold,
+		                float near_clipping_distance,
+		                float far_clipping_distance,
+		                float min_color_gradient,
+		                float tukey_cutoff,
+		                int frames_to_skip,
+		                int frames_to_weight,
+		                const ImageProcessingEngineInterface* image_processing_engine,
+		                MemoryDeviceType memory_type);
 		virtual ~ExtendedTracker();
 	};
 }

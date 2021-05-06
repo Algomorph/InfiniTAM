@@ -23,7 +23,7 @@ namespace ITMLib
 	public:
 		void Track(CameraTrackingState *trackingState, const View *view)
 		{
-			if (!tracker->requiresPointCloudRendering() || trackingState->point_cloud_age != -1)
+			if (!tracker->RequiresPointCloudRendering() || trackingState->point_cloud_age != -1)
 				tracker->TrackCamera(trackingState, view);
 		}
 
@@ -31,11 +31,11 @@ namespace ITMLib
 		void Prepare(CameraTrackingState *trackingState, const SurfelScene<TSurfel> *scene, const View *view,
 		             const SurfelVisualizationEngine<TSurfel> *VisualizationEngine, SurfelRenderState *renderState)
 		{
-			if (!tracker->requiresPointCloudRendering())
+			if (!tracker->RequiresPointCloudRendering())
 				return;
 
 			//render for tracking
-			bool requiresColourRendering = tracker->requiresColourRendering();
+			bool requiresColourRendering = tracker->RequiresColorRendering();
 			bool requiresFullRendering = trackingState->TrackerFarFromPointCloud() || !settings->use_approximate_raycast;
 
 			if(requiresColourRendering)
@@ -77,11 +77,11 @@ namespace ITMLib
 		void Prepare(CameraTrackingState *tracking_state, VoxelVolume<TVoxel,TIndex> *volume, const View *view,
 		             const RaycastingEngineBase<TVoxel,TIndex> *raycasting_engine, RenderState *render_state)
 		{
-			if (!tracker->requiresPointCloudRendering())
+			if (!tracker->RequiresPointCloudRendering())
 				return;
 
 			//render for tracking
-			bool requiresColourRendering = tracker->requiresColourRendering();
+			bool requiresColourRendering = tracker->RequiresColorRendering();
 			bool requiresFullRendering = tracking_state->TrackerFarFromPointCloud() || !settings->use_approximate_raycast;
 
 			if (requiresColourRendering)
@@ -118,7 +118,7 @@ namespace ITMLib
 
 		const Vector2i& GetTrackedImageSize(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d) const
 		{
-			return tracker->requiresColourRendering() ? imgSize_rgb : imgSize_d;
+			return tracker->RequiresColorRendering() ? imgSize_rgb : imgSize_d;
 		}
 
 		// Suppress the default copy constructor and assignment operator

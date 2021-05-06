@@ -190,6 +190,9 @@ set(
 
         Engines/RigidAlignment/RigidAlignmentSettings.h
         Engines/RigidAlignment/RigidAlignmentOptimizationType.h
+        Engines/RigidAlignment/RigidAlignmentEngineInterface.h
+
+        Engines/RigidAlignment/ImagePyramid/PyramidLevel.h
 )
 
 set(
@@ -197,6 +200,8 @@ set(
 
         Engines/RigidAlignment/RigidAlignmentSettings.cpp
         Engines/RigidAlignment/RigidAlignmentOptimizationType.cpp
+
+        Engines/RigidAlignment/ImagePyramid/PyramidLevel.cpp
 )
 
 
@@ -1082,7 +1087,7 @@ set(headers
     ${ITMLIB_CAMERA_TRACKERS_CUDA_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_INTERFACE_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_SHARED_HEADERS}
-    ${ITMLIB_UTILS_HEADERS} Engines/ImageProcessing/ImageProcessingEngine.tpp Engines/ImageProcessing/ImageProcessingEngine.h)
+    ${ITMLIB_UTILS_HEADERS} Engines/ImageProcessing/ImageProcessingEngine.tpp Engines/ImageProcessing/ImageProcessingEngine.h Engines/RigidAlignment/RigidAlignmentEngineInterface.h Engines/RigidAlignment/DenseDepthAndColorGaussNewtonEngine.tpp Engines/RigidAlignment/DenseDepthAndColorGaussNewtonEngine.h)
 
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})

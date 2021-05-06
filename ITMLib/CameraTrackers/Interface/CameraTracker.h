@@ -31,9 +31,9 @@ namespace ITMLib
 		*/
 		virtual void UpdateInitialPose(CameraTrackingState *trackingState) {}
 
-		virtual bool requiresColourRendering() const = 0;
-		virtual bool requiresDepthReliability() const = 0;
-		virtual bool requiresPointCloudRendering() const = 0;
+		virtual bool RequiresColorRendering() const = 0;
+		virtual bool RequiresDepthReliability() const = 0;
+		virtual bool RequiresPointCloudRendering() const = 0;
 
 		virtual ~CameraTracker() {}
 	};

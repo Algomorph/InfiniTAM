@@ -123,7 +123,7 @@ void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, 
 	// BOOST_REQUIRE(view_gt == *environment.view_teddy_frame116);
 
 	CameraTrackingState* tracking_state_to_use = nullptr;
-	if (tracker->requiresColourRendering()) {
+	if (tracker->RequiresColorRendering()) {
 		tracking_state_to_use = &environment.tracking_state_color_and_depth;
 	} else {
 		tracking_state_to_use = &environment.tracking_state_depth_only;
@@ -166,7 +166,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ForceFailTracker_CPU_VBH, environment_VBH_CPU){
 	);
 
 	CameraTrackingState* tracking_state_to_use = nullptr;
-	if (tracker->requiresColourRendering()) {
+	if (tracker->RequiresColorRendering()) {
 		tracking_state_to_use = &this->tracking_state_color_and_depth;
 	} else {
 		tracking_state_to_use = &this->tracking_state_depth_only;

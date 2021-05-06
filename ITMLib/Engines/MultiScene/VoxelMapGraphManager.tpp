@@ -80,8 +80,8 @@ namespace ITMLib
 	bool VoxelMapGraphManager<TVoxel, TIndex>::resetTracking(int localMapId, const ORUtils::SE3Pose & pose)
 	{
 		if ((localMapId < 0) || ((unsigned)localMapId >= allData.size())) return false;
-		allData[localMapId]->trackingState->pose_d->SetFrom(&pose);
-		allData[localMapId]->trackingState->point_cloud_age = -1;
+		allData[localMapId]->tracking_state->pose_d->SetFrom(&pose);
+		allData[localMapId]->tracking_state->point_cloud_age = -1;
 		return true;
 	}
 

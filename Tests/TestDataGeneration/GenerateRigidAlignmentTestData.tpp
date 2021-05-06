@@ -132,7 +132,7 @@ void GenerateRigidAlignmentTestData() {
 				TMemoryDeviceType, preset.c_str(), teddy::frame_image_size, teddy::frame_image_size,
 				image_processing_engine, imu_calibrator,
 				teddy::DefaultVolumeParameters());
-		bool requires_color_rendering = tracker->requiresColourRendering();
+		bool requires_color_rendering = tracker->RequiresColorRendering();
 		if (requires_color_rendering) {
 			ORUtils::SE3Pose pose_rgb(view->calibration_information.trafo_rgb_to_depth.calib_inv * tracking_state.pose_d->GetM());
 			raycasting_engine->CreateExpectedDepths(&teddy_volume_115, &pose_rgb, &(view->calibration_information.intrinsics_rgb), &render_state);

@@ -105,13 +105,13 @@ ExtendedTracker_CUDA::~ExtendedTracker_CUDA()
 
 int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hessian, Matrix4f approxInvPose)
 {
-	Vector2i sceneImageSize = sceneHierarchyLevel_Depth->pointsMap->dimensions;
-	Vector2i viewImageSize = viewHierarchyLevel_Depth->depth->dimensions;
+	Vector2i sceneImageSize = point_cloud_hierarchy_level_depth->pointsMap->dimensions;
+	Vector2i viewImageSize = view_hierarchy_level_depth->depth->dimensions;
 
-	if (currentIterationType == TRACKER_ITERATION_NONE) return 0;
+	if (current_iteration_type == TRACKER_ITERATION_NONE) return 0;
 
-	bool shortIteration = currentIterationType == TRACKER_ITERATION_ROTATION
-						  || currentIterationType == TRACKER_ITERATION_TRANSLATION;
+	bool shortIteration = current_iteration_type == TRACKER_ITERATION_ROTATION
+	                      || current_iteration_type == TRACKER_ITERATION_TRANSLATION;
 
 	int noPara = shortIteration ? 3 : 6;
 
@@ -122,25 +122,25 @@ int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hess
 
 	ITMExtendedTracker_KernelParameters_Depth args;
 	args.accu = accu_device;
-	args.depth = viewHierarchyLevel_Depth->depth->GetData(MEMORYDEVICE_CUDA);
+	args.depth = view_hierarchy_level_depth->depth->GetData(MEMORYDEVICE_CUDA);
 	args.approxInvPose = approxInvPose;
-	args.pointsMap = sceneHierarchyLevel_Depth->pointsMap->GetData(MEMORYDEVICE_CUDA);
-	args.normalsMap = sceneHierarchyLevel_Depth->normalsMap->GetData(MEMORYDEVICE_CUDA);
-	args.sceneIntrinsics = sceneHierarchyLevel_Depth->intrinsics;
+	args.pointsMap = point_cloud_hierarchy_level_depth->pointsMap->GetData(MEMORYDEVICE_CUDA);
+	args.normalsMap = point_cloud_hierarchy_level_depth->normalsMap->GetData(MEMORYDEVICE_CUDA);
+	args.sceneIntrinsics = point_cloud_hierarchy_level_depth->intrinsics;
 	args.sceneImageSize = sceneImageSize;
-	args.scenePose = scenePose;
-	args.viewIntrinsics = viewHierarchyLevel_Depth->intrinsics;
-	args.viewImageSize = viewHierarchyLevel_Depth->depth->dimensions;
-	args.spaceThresh = spaceThresh[currentLevelId];
-	args.viewFrustum_min = viewFrustum_min;
-	args.viewFrustum_max = viewFrustum_max;
-	args.tukeyCutOff = tukeyCutOff;
-	args.framesToSkip = framesToSkip;
-	args.framesToWeight = framesToWeight;
+	args.scenePose = scene_pose;
+	args.viewIntrinsics = view_hierarchy_level_depth->intrinsics;
+	args.viewImageSize = view_hierarchy_level_depth->depth->dimensions;
+	args.spaceThresh = level_distance_thresholds[current_level_id];
+	args.viewFrustum_min = near_clipping_distance;
+	args.viewFrustum_max = far_clipping_distance;
+	args.tukeyCutOff = tukey_cutoff;
+	args.framesToSkip = frames_to_skip;
+	args.framesToWeight = frames_to_weight;
 
-	if (framesProcessed < 100)
+	if (frames_processed < 100)
 	{
-		switch (currentIterationType)
+		switch (current_iteration_type)
 		{
 		case TRACKER_ITERATION_ROTATION:
 			exDepthTrackerOneLevel_g_rt_device<true, true, false> <<<gridSize, blockSize >>>(args);
@@ -159,7 +159,7 @@ int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hess
 	}
 	else
 	{
-		switch (currentIterationType)
+		switch (current_iteration_type)
 		{
 		case TRACKER_ITERATION_ROTATION:
 			exDepthTrackerOneLevel_g_rt_device<true, true, true> <<<gridSize, blockSize >>>(args);
@@ -198,13 +198,13 @@ int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hess
 
 int ExtendedTracker_CUDA::ComputeGandH_RGB(float &f, float *nabla, float *hessian, Matrix4f approxInvPose)
 {
-	Vector2i imageSize_depth = viewHierarchyLevel_Depth->depth->dimensions;
-	Vector2i imageSize_rgb = viewHierarchyLevel_Intensity->intensity_prev->dimensions;
+	Vector2i imageSize_depth = view_hierarchy_level_depth->depth->dimensions;
+	Vector2i imageSize_rgb = view_hierarchy_level_intensity->intensity_prev->dimensions;
 
-	if (currentIterationType == TRACKER_ITERATION_NONE) return 0;
+	if (current_iteration_type == TRACKER_ITERATION_NONE) return 0;
 
-	bool shortIteration = currentIterationType == TRACKER_ITERATION_ROTATION
-						  || currentIterationType == TRACKER_ITERATION_TRANSLATION;
+	bool shortIteration = current_iteration_type == TRACKER_ITERATION_ROTATION
+	                      || current_iteration_type == TRACKER_ITERATION_TRANSLATION;
 
 	int noPara = shortIteration ? 3 : 6;
 
@@ -215,23 +215,23 @@ int ExtendedTracker_CUDA::ComputeGandH_RGB(float &f, float *nabla, float *hessia
 
 	ITMExtendedTracker_KernelParameters_RGB args;
 	args.accu = accu_device;
-	args.points_curr = reprojectedPointsLevel->data->GetData(MEMORYDEVICE_CUDA);
-	args.intensities_curr = projectedIntensityLevel->data->GetData(MEMORYDEVICE_CUDA);
-	args.intensities_prev = viewHierarchyLevel_Intensity->intensity_prev->GetData(MEMORYDEVICE_CUDA);
-	args.gradients = viewHierarchyLevel_Intensity->gradients->GetData(MEMORYDEVICE_CUDA);
+	args.points_curr = reprojected_points_level->data->GetData(MEMORYDEVICE_CUDA);
+	args.intensities_curr = projected_intensity_level->data->GetData(MEMORYDEVICE_CUDA);
+	args.intensities_prev = view_hierarchy_level_intensity->intensity_prev->GetData(MEMORYDEVICE_CUDA);
+	args.gradients = view_hierarchy_level_intensity->gradients->GetData(MEMORYDEVICE_CUDA);
 	args.imageSize_rgb = imageSize_rgb;
 	args.imageSize_depth = imageSize_depth;
 	args.approxInvPose = approxInvPose;
-	args.scenePose = depthToRGBTransform * scenePose;
-	args.projParams_depth = viewHierarchyLevel_Depth->intrinsics;
-	args.projParams_rgb = viewHierarchyLevel_Intensity->intrinsics;
-	args.colourThresh = colourThresh[currentLevelId];
-	args.minGradient = minColourGradient;
-	args.viewFrustum_min = viewFrustum_min;
-	args.viewFrustum_max = viewFrustum_max;
-	args.tukeyCutOff = tukeyCutOff;
+	args.scenePose = depth_to_color_camera_transform * scene_pose;
+	args.projParams_depth = view_hierarchy_level_depth->intrinsics;
+	args.projParams_rgb = view_hierarchy_level_intensity->intrinsics;
+	args.colourThresh = level_color_thresholds[current_level_id];
+	args.minGradient = min_color_gradient;
+	args.viewFrustum_min = near_clipping_distance;
+	args.viewFrustum_max = far_clipping_distance;
+	args.tukeyCutOff = tukey_cutoff;
 
-	switch (currentIterationType)
+	switch (current_iteration_type)
 	{
 	case TRACKER_ITERATION_ROTATION:
 		exRGBTrackerOneLevel_g_rt_device<true, true> <<<gridSize, blockSize >>>(args);

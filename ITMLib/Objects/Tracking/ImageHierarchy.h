@@ -16,14 +16,14 @@ namespace ITMLib
 
 	public:
 		ImageHierarchy(Vector2i imgSize, TrackerIterationType *trackingRegime, int hierarchy_level_count,
-		               MemoryDeviceType memoryType, bool skipAllocationForLevel0 = false)
+		               MemoryDeviceType memoryType, bool skip_allocation_for_level_0 = false)
 		{
 			this->noLevels = hierarchy_level_count;
 
 			levels = new TLevelType*[hierarchy_level_count];
 
 			for (int i = hierarchy_level_count - 1; i >= 0; i--)
-				levels[i] = new TLevelType(imgSize, i, trackingRegime[i], memoryType, (i == 0) && skipAllocationForLevel0);
+				levels[i] = new TLevelType(imgSize, i, trackingRegime[i], memoryType, (i == 0) && skip_allocation_for_level_0);
 		}
 
 		void UpdateHostFromDevice()

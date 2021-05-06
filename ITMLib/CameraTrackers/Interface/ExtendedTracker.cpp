@@ -14,82 +14,82 @@
 
 using namespace ITMLib;
 
-const int ExtendedTracker::MIN_VALID_POINTS_DEPTH = 100;
-const int ExtendedTracker::MIN_VALID_POINTS_RGB = 100;
+const int ExtendedTracker::min_valid_points_depth = 100;
+const int ExtendedTracker::min_valid_points_color = 100;
 
-ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
-                                 Vector2i imgSize_rgb,
-                                 bool useDepth,
-                                 bool useColour,
-                                 float colourWeight,
-                                 TrackerIterationType *trackingRegime,
-                                 int noHierarchyLevels,
-                                 float terminationThreshold,
-                                 float failureDetectorThreshold,
-                                 float viewFrustum_min,
-                                 float viewFrustum_max,
-                                 float minColourGradient,
-                                 float tukeyCutOff,
-                                 int framesToSkip,
-                                 int framesToWeight,
-                                 const ImageProcessingEngineInterface *lowLevelEngine,
-                                 MemoryDeviceType memoryType
+ExtendedTracker::ExtendedTracker(Vector2i depth_image_size,
+                                 Vector2i color_image_size,
+                                 bool use_depth,
+                                 bool use_color,
+                                 float color_weight,
+                                 TrackerIterationType *level_optimization_types,
+                                 int hierarchy_level_count,
+                                 float termination_threshold,
+                                 float failure_detection_threshold,
+                                 float near_clipping_distance,
+                                 float far_clipping_distance,
+                                 float min_color_gradient,
+                                 float tukey_cutoff,
+                                 int frames_to_skip,
+                                 int frames_to_weight,
+                                 const ImageProcessingEngineInterface *image_processing_engine,
+                                 MemoryDeviceType memory_type
 									   )
 {
-	this->useDepth = useDepth;
-	this->useColour = useColour;
+	this->use_depth = use_depth;
+	this->use_color = use_color;
 
-	if (!useDepth && !useColour)
+	if (!use_depth && !use_color)
 	{
 		throw std::runtime_error("Invalid configuration: at least one of depth and colour trackers must be active.");
 	}
 
 	// We always need the current depth image pyramid
-	viewHierarchy_Depth = new ImageHierarchy<DepthHierarchyLevel>(imgSize_d, trackingRegime,
-	                                                              noHierarchyLevels, memoryType, true);
+	view_hierarchy_depth = new ImageHierarchy<DepthHierarchyLevel>(depth_image_size, level_optimization_types,
+	                                                               hierarchy_level_count, memory_type, true);
 
 	// We need the colour pyramid only when colour is used for tracking.
-	if (useColour)
+	if (use_color)
 	{
 		// Do NOT skip allocation for level 0 since intensity images are only used in the tracker
-		viewHierarchy_Intensity = new ImageHierarchy<IntensityHierarchyLevel>(imgSize_rgb, trackingRegime,
-		                                                                      noHierarchyLevels, memoryType,
-		                                                                      false);
+		view_hierarchy_intensity = new ImageHierarchy<IntensityHierarchyLevel>(color_image_size, level_optimization_types,
+		                                                                       hierarchy_level_count, memory_type,
+		                                                                       false);
 
-		reprojectedPointsHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<Float4Image> >(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, false);
-		projectedIntensityHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<FloatImage> >(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, false);
+		reprojected_points_hierarchy = new ImageHierarchy<TemplatedHierarchyLevel<Float4Image> >(depth_image_size, level_optimization_types, hierarchy_level_count, memory_type, false);
+		projected_intensity_hierarchy = new ImageHierarchy<TemplatedHierarchyLevel<FloatImage> >(depth_image_size, level_optimization_types, hierarchy_level_count, memory_type, false);
 	}
 	else
 	{
-		viewHierarchy_Intensity = nullptr;
-		reprojectedPointsHierarchy = nullptr;
-		projectedIntensityHierarchy = nullptr;
+		view_hierarchy_intensity = nullptr;
+		reprojected_points_hierarchy = nullptr;
+		projected_intensity_hierarchy = nullptr;
 	}
 
 	// We need the scene hierarchy (ICP and Normal raycasts) only if depth is used for tracking.
-	if (useDepth)
+	if (use_depth)
 	{
-		sceneHierarchy = new ImageHierarchy<OrderedPointCloudHierarchyLevel>(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, true);
+		scene_hierarchy = new ImageHierarchy<OrderedPointCloudHierarchyLevel>(depth_image_size, level_optimization_types, hierarchy_level_count, memory_type, true);
 	}
 
-	this->noIterationsPerLevel = new int[noHierarchyLevels];
-	this->spaceThresh = new float[noHierarchyLevels];
-	this->colourThresh = new float[noHierarchyLevels];
+	this->iteration_per_level_count = new int[hierarchy_level_count];
+	this->level_distance_thresholds = new float[hierarchy_level_count];
+	this->level_color_thresholds = new float[hierarchy_level_count];
 
-	SetupLevels(noHierarchyLevels * 2, 2, 0.01f, 0.002f, 0.1f, 0.02f);
+	SetupLevels(hierarchy_level_count * 2, 2, 0.01f, 0.002f, 0.1f, 0.02f);
 
-	this->lowLevelEngine = lowLevelEngine;
+	this->low_level_engine = image_processing_engine;
 
-	this->terminationThreshold = terminationThreshold;
+	this->termination_threshold = termination_threshold;
 
-	this->colourWeight = colourWeight;
-	this->minColourGradient = minColourGradient;
+	this->color_weight = color_weight;
+	this->min_color_gradient = min_color_gradient;
 
-	this->viewFrustum_min = viewFrustum_min;
-	this->viewFrustum_max = viewFrustum_max;
-	this->tukeyCutOff = tukeyCutOff;
-	this->framesToSkip = framesToSkip;
-	this->framesToWeight = framesToWeight;
+	this->near_clipping_distance = near_clipping_distance;
+	this->far_clipping_distance = far_clipping_distance;
+	this->tukey_cutoff = tukey_cutoff;
+	this->frames_to_skip = frames_to_skip;
+	this->frames_to_weight = frames_to_weight;
 
 	map = new ORUtils::HomkerMap(2);
 	svmClassifier = new ORUtils::SVMClassifier(map->getDescriptorSize(4));
@@ -101,7 +101,7 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
 	w[10] = 1.98676f; w[11] = -0.45688f; w[12] = 2.53969f; w[13] = -3.50527f; w[14] = -1.68725f;
 	w[15] = 2.31608f; w[16] = 5.14778f; w[17] = 2.31334f; w[18] = -14.128f; w[19] = 6.76423f;
 
-	float b = 9.334260e-01f + failureDetectorThreshold;
+	float b = 9.334260e-01f + failure_detection_threshold;
 
 	mu = Vector4f(-34.9470512137603f, -33.1379108518478f, 0.195948598235857f, 0.611027292662361f);
 	sigma = Vector4f(68.1654461020426f, 60.6607826748643f, 0.00343068557187040f, 0.0402595570918749f);
@@ -111,15 +111,15 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
 
 ExtendedTracker::~ExtendedTracker()
 {
-	delete viewHierarchy_Depth;
-	delete viewHierarchy_Intensity;
-	delete sceneHierarchy;
-	delete reprojectedPointsHierarchy;
-	delete projectedIntensityHierarchy;
+	delete view_hierarchy_depth;
+	delete view_hierarchy_intensity;
+	delete scene_hierarchy;
+	delete reprojected_points_hierarchy;
+	delete projected_intensity_hierarchy;
 
-	delete[] noIterationsPerLevel;
-	delete[] spaceThresh;
-	delete[] colourThresh;
+	delete[] iteration_per_level_count;
+	delete[] level_distance_thresholds;
+	delete[] level_color_thresholds;
 
 	delete map;
 	delete svmClassifier;
@@ -128,38 +128,38 @@ ExtendedTracker::~ExtendedTracker()
 /**
  * \brief set up thresholds and number of iterations for each level of the image hierarchy
  * The specific numbers for each level of the hierarchy will be linearly interpolated between the specified coarse and fine values
- * \param numIterCoarse number of iterations at the coarsest level of the image hierarchy
- * \param numIterFine number of iterations at the finest level of the image hierarchy
- * \param spaceThreshCoarse Euclidean distance threshold for ICP for the coarsest level of the image hierarchy
- * \param spaceThreshFine Euclidean distance threshold for ICP for the finest level of the image hierarchy
- * \param colourThreshCoarse color-space distance threshold for ICP for the coarsest level of the image hierarchy
- * \param colourThreshFine color-space distance threshold for ICP for the finest level of the image hierarchy
+ * \param iteration_count_coarse number of iterations at the coarsest level of the image hierarchy
+ * \param iteration_count_fine number of iterations at the finest level of the image hierarchy
+ * \param distance_threshold_coarse Euclidean distance threshold for ICP for the coarsest level of the image hierarchy
+ * \param distance_threshold_fine Euclidean distance threshold for ICP for the finest level of the image hierarchy
+ * \param color_threshold_coarse color-space distance threshold for ICP for the coarsest level of the image hierarchy
+ * \param color_threshold_fine color-space distance threshold for ICP for the finest level of the image hierarchy
  */
-void ExtendedTracker::SetupLevels(int numIterCoarse, int numIterFine, float spaceThreshCoarse, float spaceThreshFine, float colourThreshCoarse, float colourThreshFine)
+void ExtendedTracker::SetupLevels(int iteration_count_coarse, int iteration_count_fine, float distance_threshold_coarse, float distance_threshold_fine, float color_threshold_coarse, float color_threshold_fine)
 {
-	int noHierarchyLevels = viewHierarchy_Depth->GetNoLevels();
+	int noHierarchyLevels = view_hierarchy_depth->GetNoLevels();
 
-	if (numIterCoarse != -1 && numIterFine != -1) {
-		float step = (float)(numIterCoarse - numIterFine) / (float)(noHierarchyLevels - 1);
-		float val = (float)numIterCoarse;
+	if (iteration_count_coarse != -1 && iteration_count_fine != -1) {
+		float step = (float)(iteration_count_coarse - iteration_count_fine) / (float)(noHierarchyLevels - 1);
+		float val = (float)iteration_count_coarse;
 		for (int levelId = noHierarchyLevels - 1; levelId >= 0; levelId--) {
-			this->noIterationsPerLevel[levelId] = (int)round(val);
+			this->iteration_per_level_count[levelId] = (int)round(val);
 			val -= step;
 		}
 	}
-	if (spaceThreshCoarse >= 0.0f && spaceThreshFine >= 0.0f) {
-		float step = (float)(spaceThreshCoarse - spaceThreshFine) / (float)(noHierarchyLevels - 1);
-		float val = spaceThreshCoarse;
+	if (distance_threshold_coarse >= 0.0f && distance_threshold_fine >= 0.0f) {
+		float step = (float)(distance_threshold_coarse - distance_threshold_fine) / (float)(noHierarchyLevels - 1);
+		float val = distance_threshold_coarse;
 		for (int levelId = noHierarchyLevels - 1; levelId >= 0; levelId--) {
-			this->spaceThresh[levelId] = val;
+			this->level_distance_thresholds[levelId] = val;
 			val -= step;
 		}
 	}
-	if (colourThreshCoarse >= 0.0f && colourThreshFine >= 0.0f) {
-		float step = (float)(colourThreshCoarse - colourThreshFine) / (float)(noHierarchyLevels - 1);
-		float val = colourThreshCoarse;
+	if (color_threshold_coarse >= 0.0f && color_threshold_fine >= 0.0f) {
+		float step = (float)(color_threshold_coarse - color_threshold_fine) / (float)(noHierarchyLevels - 1);
+		float val = color_threshold_coarse;
 		for (int levelId = noHierarchyLevels - 1; levelId >= 0; levelId--) {
-			this->colourThresh[levelId] = val;
+			this->level_color_thresholds[levelId] = val;
 			val -= step;
 		}
 	}
@@ -167,7 +167,7 @@ void ExtendedTracker::SetupLevels(int numIterCoarse, int numIterFine, float spac
 
 void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, const View *view)
 {
-	this->trackingState = trackingState;
+	this->tracking_state = trackingState;
 	this->view = view;
 
 	// Note: - viewHierarchy_Depth allows pointers to external data at level 0
@@ -175,74 +175,74 @@ void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, cons
 	// 		 - sceneHierarchy allows pointers to external data at level 0
 
 	// Depth image hierarchy is always used
-	viewHierarchy_Depth->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projection_params_simple.all;
+	view_hierarchy_depth->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projection_params_simple.all;
 	// TODO: somehow fix this cast that removes const modifier... TRAVESTY!
-	viewHierarchy_Depth->GetLevel(0)->depth = (ORUtils::Image<float>*)&view->depth;
+	view_hierarchy_depth->GetLevel(0)->depth = (ORUtils::Image<float>*)&view->depth;
 
-	if (useColour)
+	if (use_color)
 	{
-		viewHierarchy_Intensity->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
+		view_hierarchy_intensity->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
 
 		// Convert RGB to intensity
-		lowLevelEngine->ConvertColorToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_current, view->rgb);
-		lowLevelEngine->ConvertColorToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_prev, *view->rgb_prev);
+		low_level_engine->ConvertColorToIntensity(*view_hierarchy_intensity->GetLevel(0)->intensity_current, view->rgb);
+		low_level_engine->ConvertColorToIntensity(*view_hierarchy_intensity->GetLevel(0)->intensity_prev, *view->rgb_prev);
 
 		// Compute first level gradients
-		lowLevelEngine->GradientXY(*viewHierarchy_Intensity->GetLevel(0)->gradients,
-								   *viewHierarchy_Intensity->GetLevel(0)->intensity_prev);
+		low_level_engine->GradientXY(*view_hierarchy_intensity->GetLevel(0)->gradients,
+		                             *view_hierarchy_intensity->GetLevel(0)->intensity_prev);
 	}
 
 	// Pointclouds are needed only when the depth tracker is enabled
-	if (useDepth)
+	if (use_depth)
 	{
-		sceneHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projection_params_simple.all;
-		sceneHierarchy->GetLevel(0)->pointsMap = &trackingState->point_cloud->locations;
-		sceneHierarchy->GetLevel(0)->normalsMap = &trackingState->point_cloud->colors;
+		scene_hierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projection_params_simple.all;
+		scene_hierarchy->GetLevel(0)->pointsMap = &trackingState->point_cloud->locations;
+		scene_hierarchy->GetLevel(0)->normalsMap = &trackingState->point_cloud->colors;
 	}
 
-	scenePose = trackingState->pose_pointCloud->GetM();
-	depthToRGBTransform = view->calibration_information.trafo_rgb_to_depth.calib_inv;
-	framesProcessed = trackingState->framesProcessed;
+	scene_pose = trackingState->pose_pointCloud->GetM();
+	depth_to_color_camera_transform = view->calibration_information.trafo_rgb_to_depth.calib_inv;
+	frames_processed = trackingState->framesProcessed;
 }
 
 void ExtendedTracker::PrepareForEvaluation()
 {
 	// Create depth pyramid
-	for (int i = 1; i < viewHierarchy_Depth->GetNoLevels(); i++)
+	for (int i = 1; i < view_hierarchy_depth->GetNoLevels(); i++)
 	{
-		DepthHierarchyLevel *currentLevel = viewHierarchy_Depth->GetLevel(i);
-		DepthHierarchyLevel *previousLevel = viewHierarchy_Depth->GetLevel(i - 1);
+		DepthHierarchyLevel *currentLevel = view_hierarchy_depth->GetLevel(i);
+		DepthHierarchyLevel *previousLevel = view_hierarchy_depth->GetLevel(i - 1);
 
-		lowLevelEngine->FilterSubsampleWithHoles(*currentLevel->depth, *previousLevel->depth);
+		low_level_engine->FilterSubsampleWithHoles(*currentLevel->depth, *previousLevel->depth);
 
 		currentLevel->intrinsics = previousLevel->intrinsics * 0.5f;
 	}
 
 	// Create current and previous frame pyramids
-	if (useColour)
+	if (use_color)
 	{
-		for (int i = 1; i < viewHierarchy_Intensity->GetNoLevels(); i++)
+		for (int i = 1; i < view_hierarchy_intensity->GetNoLevels(); i++)
 		{
-			IntensityHierarchyLevel *currentLevel = viewHierarchy_Intensity->GetLevel(i);
-			IntensityHierarchyLevel *previousLevel = viewHierarchy_Intensity->GetLevel(i - 1);
+			IntensityHierarchyLevel *currentLevel = view_hierarchy_intensity->GetLevel(i);
+			IntensityHierarchyLevel *previousLevel = view_hierarchy_intensity->GetLevel(i - 1);
 
-			lowLevelEngine->FilterSubsample(*currentLevel->intensity_current, *previousLevel->intensity_current);
-			lowLevelEngine->FilterSubsample(*currentLevel->intensity_prev, *previousLevel->intensity_prev);
+			low_level_engine->FilterSubsample(*currentLevel->intensity_current, *previousLevel->intensity_current);
+			low_level_engine->FilterSubsample(*currentLevel->intensity_prev, *previousLevel->intensity_prev);
 
 			currentLevel->intrinsics = previousLevel->intrinsics * 0.5f;
 
 			// Also compute_allocated gradients
-			lowLevelEngine->GradientXY(*currentLevel->gradients, *currentLevel->intensity_prev);
+			low_level_engine->GradientXY(*currentLevel->gradients, *currentLevel->intensity_prev);
 		}
 
 		// Project RGB image according to the depth->rgb transform and cache it to speed up the energy computation
-		for (int i = 0; i < viewHierarchy_Intensity->GetNoLevels(); ++i)
+		for (int i = 0; i < view_hierarchy_intensity->GetNoLevels(); ++i)
 		{
-			TemplatedHierarchyLevel<Float4Image> *pointsOut = reprojectedPointsHierarchy->GetLevel(i);
-			TemplatedHierarchyLevel<FloatImage> *intensityOut = projectedIntensityHierarchy->GetLevel(i);
+			TemplatedHierarchyLevel<Float4Image> *pointsOut = reprojected_points_hierarchy->GetLevel(i);
+			TemplatedHierarchyLevel<FloatImage> *intensityOut = projected_intensity_hierarchy->GetLevel(i);
 
-			const IntensityHierarchyLevel *intensityIn = viewHierarchy_Intensity->GetLevel(i);
-			const DepthHierarchyLevel *depthIn = viewHierarchy_Depth->GetLevel(i);
+			const IntensityHierarchyLevel *intensityIn = view_hierarchy_intensity->GetLevel(i);
+			const DepthHierarchyLevel *depthIn = view_hierarchy_depth->GetLevel(i);
 
 			Vector4f intrinsics_rgb = intensityIn->intrinsics;
 			Vector4f intrinsics_depth = depthIn->intrinsics;
@@ -255,15 +255,15 @@ void ExtendedTracker::PrepareForEvaluation()
 	}
 
 	// Create raycasted pyramid
-	if (useDepth)
+	if (use_depth)
 	{
-		for (int i = 1; i < sceneHierarchy->GetNoLevels(); i++)
+		for (int i = 1; i < scene_hierarchy->GetNoLevels(); i++)
 		{
-			OrderedPointCloudHierarchyLevel *currentLevel = sceneHierarchy->GetLevel(i);
-			OrderedPointCloudHierarchyLevel *previousLevel = sceneHierarchy->GetLevel(i - 1);
+			OrderedPointCloudHierarchyLevel *currentLevel = scene_hierarchy->GetLevel(i);
+			OrderedPointCloudHierarchyLevel *previousLevel = scene_hierarchy->GetLevel(i - 1);
 
-			lowLevelEngine->FilterSubsampleWithHoles(*currentLevel->pointsMap, *previousLevel->pointsMap);
-			lowLevelEngine->FilterSubsampleWithHoles(*currentLevel->normalsMap, *previousLevel->normalsMap);
+			low_level_engine->FilterSubsampleWithHoles(*currentLevel->pointsMap, *previousLevel->pointsMap);
+			low_level_engine->FilterSubsampleWithHoles(*currentLevel->normalsMap, *previousLevel->normalsMap);
 			currentLevel->intrinsics = previousLevel->intrinsics * 0.5f;
 		}
 	}
@@ -271,27 +271,27 @@ void ExtendedTracker::PrepareForEvaluation()
 
 void ExtendedTracker::SetEvaluationParams(int levelId)
 {
-	currentLevelId = levelId;
-	viewHierarchyLevel_Depth = viewHierarchy_Depth->GetLevel(levelId);
+	current_level_id = levelId;
+	view_hierarchy_level_depth = view_hierarchy_depth->GetLevel(levelId);
 
 	// We use a single sequence of iterationTypes, regardless of the colour/depth choice.
 	// Using different strategies for colour and depth does not seem to improve the accuracy (tests by Tommaso, 15/08/2016)
 	// We rely on the one stored in viewHierarchyLevel_Depth because it's guaranteed to be available.
 	// sceneHierarchyLevel_Depth is available only when depth tracking is enabled
 	// viewHierarchyLevel_Intensity is available only when colour is enabled.
-	currentIterationType = viewHierarchyLevel_Depth->iterationType;
+	current_iteration_type = view_hierarchy_level_depth->iterationType;
 
-	if (useDepth)
+	if (use_depth)
 	{
 		// During the optimization, every level of the depth frame pyramid is matched to the full resolution raycast
-		sceneHierarchyLevel_Depth = sceneHierarchy->GetLevel(0);
+		point_cloud_hierarchy_level_depth = scene_hierarchy->GetLevel(0);
 	}
 
-	if (useColour)
+	if (use_color)
 	{
-		viewHierarchyLevel_Intensity = viewHierarchy_Intensity->GetLevel(levelId);
-		reprojectedPointsLevel = reprojectedPointsHierarchy->GetLevel(levelId);
-		projectedIntensityLevel = projectedIntensityHierarchy->GetLevel(levelId);
+		view_hierarchy_level_intensity = view_hierarchy_intensity->GetLevel(levelId);
+		reprojected_points_level = reprojected_points_hierarchy->GetLevel(levelId);
+		projected_intensity_level = projected_intensity_hierarchy->GetLevel(levelId);
 	}
 }
 
@@ -318,7 +318,7 @@ bool ExtendedTracker::HasConverged(float *step) const
 {
 	for (int i = 0; i < 6; i++)
 	{
-		if (fabs(step[i]) > terminationThreshold)
+		if (fabs(step[i]) > termination_threshold)
 		{
 			return false;
 		}
@@ -331,7 +331,7 @@ void ExtendedTracker::ApplyDelta(const Matrix4f & para_old, const float *delta, 
 {
 	float step[6];
 
-	switch (currentIterationType)
+	switch (current_iteration_type)
 	{
 	case TRACKER_ITERATION_ROTATION:
 		step[0] = (float)(delta[0]); step[1] = (float)(delta[1]); step[2] = (float)(delta[2]);
@@ -360,28 +360,28 @@ void ExtendedTracker::ApplyDelta(const Matrix4f & para_old, const float *delta, 
 
 void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_good, float f_old)
 {
-	if (!useDepth)
+	if (!use_depth)
 	{
 		// Currently we cannot handle colour only tracking
-		trackingState->trackerResult = CameraTrackingState::TRACKING_GOOD;
+		tracking_state->trackerResult = CameraTrackingState::TRACKING_GOOD;
 		return;
 	}
 
-	size_t noTotalPoints = viewHierarchy_Depth->GetLevel(0)->depth->size();
-	int noValidPointsMax = lowLevelEngine->CountValidDepths(view->depth);
+	size_t noTotalPoints = view_hierarchy_depth->GetLevel(0)->depth->size();
+	int noValidPointsMax = low_level_engine->CountValidDepths(view->depth);
 
 	float normFactor_v1 = (float)noValidPoints_old / (float)noTotalPoints;
 	float normFactor_v2 = (float)noValidPoints_old / (float)noValidPointsMax;
 
 	float det = 0.0f;
-	if (currentIterationType == TRACKER_ITERATION_BOTH) {
+	if (current_iteration_type == TRACKER_ITERATION_BOTH) {
 		ORUtils::Cholesky cholA(hessian_good, 6);
 		det = cholA.Determinant();
 		if (isnan(det)) det = 0.0f;
 	}
 
 	float det_norm_v1 = 0.0f;
-	if (currentIterationType == TRACKER_ITERATION_BOTH) {
+	if (current_iteration_type == TRACKER_ITERATION_BOTH) {
 		float h[6 * 6];
 		for (int i = 0; i < 6 * 6; ++i) h[i] = hessian_good[i] * normFactor_v1;
 		ORUtils::Cholesky cholA(h, 6);
@@ -390,7 +390,7 @@ void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_go
 	}
 
 	float det_norm_v2 = 0.0f;
-	if (currentIterationType == TRACKER_ITERATION_BOTH) {
+	if (current_iteration_type == TRACKER_ITERATION_BOTH) {
 		float h[6 * 6];
 		for (int i = 0; i < 6 * 6; ++i) h[i] = hessian_good[i] * normFactor_v2;
 		ORUtils::Cholesky cholA(h, 6);
@@ -398,10 +398,10 @@ void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_go
 		if (isnan(det_norm_v2)) det_norm_v2 = 0.0f;
 	}
 
-	float finalResidual_v2 = sqrt(((float)noValidPoints_old * f_old + (float)(noValidPointsMax - noValidPoints_old) * spaceThresh[0]) / (float)noValidPointsMax);
+	float finalResidual_v2 = sqrt(((float)noValidPoints_old * f_old + (float)(noValidPointsMax - noValidPoints_old) * level_distance_thresholds[0]) / (float)noValidPointsMax);
 	float percentageInliers_v2 = (float)noValidPoints_old / (float)noValidPointsMax;
 
-	trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
+	tracking_state->trackerResult = CameraTrackingState::TRACKING_FAILED;
 
 	if (noValidPointsMax != 0 && noTotalPoints != 0 && det_norm_v1 > 0 && det_norm_v2 > 0) {
 		Vector4f inputVector(log(det_norm_v1), log(det_norm_v2), finalResidual_v2, percentageInliers_v2);
@@ -413,20 +413,20 @@ void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_go
 
 		float score = svmClassifier->Classify(mapped);
 
-		if (score > 0) trackingState->trackerResult = CameraTrackingState::TRACKING_GOOD;
-		else if (score > -10.0f) trackingState->trackerResult = CameraTrackingState::TRACKING_POOR;
+		if (score > 0) tracking_state->trackerResult = CameraTrackingState::TRACKING_GOOD;
+		else if (score > -10.0f) tracking_state->trackerResult = CameraTrackingState::TRACKING_POOR;
 	}
 }
 
-void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View *view)
+void ExtendedTracker::TrackCamera(CameraTrackingState *tracking_state, const View *view)
 {
 	// bookkeeping
-	if (trackingState->point_cloud_age >= 0) trackingState->framesProcessed++;
-	else trackingState->framesProcessed = 0;
+	if (tracking_state->point_cloud_age >= 0) tracking_state->framesProcessed++;
+	else tracking_state->framesProcessed = 0;
 
 	// populate view-related instance members, initialize base level of image hiararchies,
 	// compute_allocated first-level gradients for RGB if necessary
-	this->SetEvaluationData(trackingState, view);
+	this->SetEvaluationData(tracking_state, view);
 	this->PrepareForEvaluation();
 
 	float hessian_good[6 * 6];
@@ -443,20 +443,20 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 	memset(hessian_depth_good, 0, sizeof(hessian_depth_good));
 
 	// traverse depth hierarchy
-	for (int levelId = viewHierarchy_Depth->GetNoLevels() - 1; levelId >= 0; levelId--)
+	for (int levelId = view_hierarchy_depth->GetNoLevels() - 1; levelId >= 0; levelId--)
 	{
 		SetEvaluationParams(levelId);
 
-		if (currentIterationType == TRACKER_ITERATION_NONE) continue;
+		if (current_iteration_type == TRACKER_ITERATION_NONE) continue;
 
-		Matrix4f approxInvPose = trackingState->pose_d->GetInvM();
-		ORUtils::SE3Pose lastKnownGoodPose(*(trackingState->pose_d));
+		Matrix4f approxInvPose = tracking_state->pose_d->GetInvM();
+		ORUtils::SE3Pose lastKnownGoodPose(*(tracking_state->pose_d));
 
 		float f_old = std::numeric_limits<float>::max();
 		float lambda = 1.0;
 
 		// optimize camera pose at this image hierarchy level up to the specified number of iterations
-		for (int iterNo = 0; iterNo < noIterationsPerLevel[levelId]; iterNo++)
+		for (int iterNo = 0; iterNo < iteration_per_level_count[levelId]; iterNo++)
 		{
 			float hessian_depth[6 * 6], hessian_RGB[6 * 6];
 			float nabla_depth[6], nabla_RGB[6];
@@ -471,11 +471,11 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 			memset(nabla_RGB, 0, sizeof(nabla_RGB));
 
 			// evaluate error function and gradients
-			if (useDepth)
+			if (use_depth)
 			{
 				noValidPoints_depth = ComputeGandH_Depth(f_depth, nabla_depth, hessian_depth, approxInvPose);
 
-				if (noValidPoints_depth > MIN_VALID_POINTS_DEPTH)
+				if (noValidPoints_depth > min_valid_points_depth)
 				{
 					// Normalize nabla and hessian
 					for (int i = 0; i < 6 * 6; ++i) hessian_depth[i] /= noValidPoints_depth;
@@ -488,11 +488,11 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 				}
 			}
 
-			if (useColour)
+			if (use_color)
 			{
 				noValidPoints_RGB = ComputeGandH_RGB(f_RGB, nabla_RGB, hessian_RGB, approxInvPose);
 
-				if (noValidPoints_RGB > MIN_VALID_POINTS_DEPTH)
+				if (noValidPoints_RGB > min_valid_points_depth)
 				{
 					// Normalize nabla and hessian
 					for (int i = 0; i < 6 * 6; ++i) hessian_RGB[i] /= noValidPoints_RGB;
@@ -510,10 +510,10 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 			float f_new = 0.f;
 			int noValidPoints_new = 0;
 
-			if (useDepth && useColour)
+			if (use_depth && use_color)
 			{
 				// Combine depth and intensity measurements
-				if (noValidPoints_depth > MIN_VALID_POINTS_DEPTH)
+				if (noValidPoints_depth > min_valid_points_depth)
 				{
 					noValidPoints_new = noValidPoints_depth;
 					f_new = f_depth;
@@ -529,22 +529,22 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 					memset(hessian_new, 0, sizeof(hessian_new));
 				}
 
-				if (noValidPoints_RGB > MIN_VALID_POINTS_RGB)
+				if (noValidPoints_RGB > min_valid_points_color)
 				{
 					noValidPoints_new += noValidPoints_RGB;
 					f_new += f_RGB;
-					for (int i = 0; i < 6; ++i) nabla_new[i] += colourWeight * nabla_RGB[i];
-					for (int i = 0; i < 6 * 6; ++i) hessian_new[i] += colourWeight * colourWeight * hessian_RGB[i];
+					for (int i = 0; i < 6; ++i) nabla_new[i] += color_weight * nabla_RGB[i];
+					for (int i = 0; i < 6 * 6; ++i) hessian_new[i] += color_weight * color_weight * hessian_RGB[i];
 				}
 			}
-			else if (useDepth)
+			else if (use_depth)
 			{
 				noValidPoints_new = noValidPoints_depth;
 				f_new = f_depth;
 				memcpy(nabla_new, nabla_depth, sizeof(nabla_depth));
 				memcpy(hessian_new, hessian_depth, sizeof(hessian_depth));
 			}
-			else if (useColour)
+			else if (use_color)
 			{
 				noValidPoints_new = noValidPoints_RGB;
 				f_new = f_RGB;
@@ -559,13 +559,13 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 			// check if error increased. If so, revert
 			if ((noValidPoints_new <= 0) || (f_new >= f_old))
 			{
-				trackingState->pose_d->SetFrom(&lastKnownGoodPose);
-				approxInvPose = trackingState->pose_d->GetInvM();
+				tracking_state->pose_d->SetFrom(&lastKnownGoodPose);
+				approxInvPose = tracking_state->pose_d->GetInvM();
 				lambda *= 10.0f;
 			}
 			else
 			{
-				lastKnownGoodPose.SetFrom(trackingState->pose_d);
+				lastKnownGoodPose.SetFrom(tracking_state->pose_d);
 				f_old = f_new;
 
 				for (int i = 0; i < 6 * 6; ++i) hessian_good[i] = hessian_new[i];
@@ -584,12 +584,12 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 
 			// compute_allocated a new step and make sure we've got an SE3
 			float step[6];
-			ComputeDelta(step, nabla_good, A, currentIterationType != TRACKER_ITERATION_BOTH);
+			ComputeDelta(step, nabla_good, A, current_iteration_type != TRACKER_ITERATION_BOTH);
 
 			ApplyDelta(approxInvPose, step, approxInvPose);
-			trackingState->pose_d->SetInvM(approxInvPose);
-			trackingState->pose_d->Coerce();
-			approxInvPose = trackingState->pose_d->GetInvM();
+			tracking_state->pose_d->SetInvM(approxInvPose);
+			tracking_state->pose_d->Coerce();
+			approxInvPose = tracking_state->pose_d->GetInvM();
 
 			// if step is small, assume it's going to decrease the error and finish
 			if (HasConverged(step)) break;
